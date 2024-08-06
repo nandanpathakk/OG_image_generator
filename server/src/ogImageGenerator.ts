@@ -14,8 +14,17 @@ export async function generateOgImage(title: string, content: string, imageUrl: 
     const maxContentLength = 200;
     const truncatedContent = truncateContent(content, maxContentLength);
 
-    // Launch a headless browser
-    const browser = await puppeteer.launch();
+    // Launch a headless browser with additional arguments
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--remote-debugging-port=9222'
+      ]
+    });
+
     const page = await browser.newPage();
 
     // Set the content of the page
