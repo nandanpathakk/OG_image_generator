@@ -31,7 +31,7 @@ export const AddPost = () => {
     if (image) formData.append('postImage', image);
 
     try {
-      const response = await axios.post("http://localhost:3000/userpost", formData);
+      const response = await axios.post("https://og-image-generator-ce56.onrender.com/userpost", formData);
       setOGImageUrl(response.data.post.ogImageUrl);
     } catch (error) {
       console.error("Error submitting the form", error);

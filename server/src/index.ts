@@ -24,7 +24,7 @@ const upload = multer({ dest: uploadDir }); // Define temporary upload directory
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "https://og-image-generator-ten-phi.vercel.app"}));
 
 const userPostBody = z.object({
   title: z.string(),

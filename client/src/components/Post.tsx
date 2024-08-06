@@ -16,7 +16,7 @@ export const Post = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/getpost');
+                const response = await axios.get('https://og-image-generator-ce56.onrender.com/getpost');
                 setPosts(response.data);
             } catch (error) {
                 console.error('Error fetching posts:', error);
