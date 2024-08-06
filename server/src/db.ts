@@ -17,6 +17,10 @@ const UserPostSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  ogImageUrl:{
+    type: String,
+    require: true
+  }
 });
 
 const UserPost = mongoose.model('UserPost', UserPostSchema);

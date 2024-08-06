@@ -1,14 +1,26 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import dotenv from 'dotenv';
+dotenv.config(); // Load environment variables
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
 import cloudinary from './utils/cloudinary';
 import UserPost from './db';
 import { z } from 'zod';
+import { generateOgImage } from './ogImageGenerator';
 
-const upload = multer({ dest: 'uploads/' }); // Define temporary upload directory
+// Define the upload directory relative to the server root
+const uploadDir = path.join(__dirname, '../uploads');
+
+// Ensure the uploads directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({ dest: uploadDir }); // Define temporary upload directory
+// const upload = multer({ dest: "uploads/" })
 
 const app = express();
 app.use(express.json());
@@ -21,6 +33,7 @@ const userPostBody = z.object({
 
 app.post('/userpost', upload.single('postImage'), async (req: Request, res: Response) => {
   const success = userPostBody.safeParse(req.body);
+  
   if (!success.success) {
     return res.status(400).json({
       msg: 'Incorrect Inputs',
@@ -31,20 +44,37 @@ app.post('/userpost', upload.single('postImage'), async (req: Request, res: Resp
     const { title, content } = req.body;
     const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({
-        msg: 'Image file is required',
+    let imageUrl;
+    let ogImageUrl;
+
+    if (file) {
+      const cloudinary_res = await cloudinary.uploader.upload(file.path, {
+        folder: '/post_images',
       });
+      imageUrl = cloudinary_res.secure_url;
     }
 
-    const cloudinary_res = await cloudinary.uploader.upload(file.path, {
-      folder: '/post_images',
+    // Generate OG Image
+    const ogImageBuffer = await generateOgImage(title, content, imageUrl || 'https://via.placeholder.com/300');
+
+    // Save OG image buffer to a file in the uploads directory
+    const ogImagePath = path.join(uploadDir, 'og-image.png');
+    fs.writeFileSync(ogImagePath, ogImageBuffer);
+
+    // Upload OG Image to Cloudinary
+    const ogImageUploadRes = await cloudinary.uploader.upload(ogImagePath, {
+      folder: '/og_images',
     });
+    ogImageUrl = ogImageUploadRes.secure_url;
+
+    // Clean up temporary OG image file
+    fs.unlinkSync(ogImagePath);
 
     const post = await UserPost.create({
       title,
       content,
-      imageUrl: cloudinary_res.secure_url,
+      imageUrl,
+      ogImageUrl,
     });
 
     res.json({
