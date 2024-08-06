@@ -75,6 +75,7 @@ app.post('/userpost', upload.single('postImage'), async (req: Request, res: Resp
       content,
       imageUrl,
       ogImageUrl,
+      createdAt: new Date()
     });
 
     res.json({
@@ -88,6 +89,21 @@ app.post('/userpost', upload.single('postImage'), async (req: Request, res: Resp
       error,
     });
   }
+});
+
+app.get("/getpost", async (req:Request, res: Response) => {
+
+  try{
+    const posts = await UserPost.find().sort({ createdAt: -1 });
+      res.json(posts)
+  }catch(error){
+    console.error("Error getting posts", error)
+    res.status(500).json({
+      msg: "Error getting posts",
+      error
+    })
+  }
+
 });
 
 app.listen(3000, () => {
