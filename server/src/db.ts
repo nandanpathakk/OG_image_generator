@@ -8,8 +8,7 @@ if (!mongodbUri) {
   throw new Error('MONGODB_URI is not defined in the .env file');
 }
 
-// mongoose.connect(mongodbUri)
-mongoose.connect("mongodb+srv://nandanpathak30:dbnew%40123@cluster0.dx4on7v.mongodb.net/ogImageGenerator")
+mongoose.connect(mongodbUri)
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
